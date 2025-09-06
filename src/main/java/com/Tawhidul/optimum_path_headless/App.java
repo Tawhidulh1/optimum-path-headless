@@ -1,7 +1,8 @@
 package com.Tawhidul.optimum_path_headless;
 
 import java.io.*;
-import java.util.Queue;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import org.jline.terminal.*;
 import org.jline.reader.*;
@@ -15,18 +16,18 @@ import org.jline.utils.InfoCmp.Capability;
 public class App {
 
   public static class Point {
-    private String[][] str;
     private int x;
     private int y;
+    public double f;
+    public double g;
+    private Point parent;
 
-    private String strVal;
-
-    public Point(String[][] str, int x, int y) {
-      this.str = str;
+    public Point(int x, int y) {
       this.x = x;
       this.y = y;
-
-      strVal = str[y][x];
+      this.f = Double.MAX_VALUE;
+      this.g = Double.MAX_VALUE;
+      parent = null;
     }
 
     public int getX() {
@@ -37,12 +38,32 @@ public class App {
       return y;
     }
 
-    public String getStrVal() {
-      return strVal;
+    public double getF() {
+      return f;
+    }
+
+    public double getG() {
+      return g;
+    }
+
+    public Point getParent() {
+      return parent;
+    }
+
+    public void setF(double f) {
+      this.f = f;
+    }
+
+    public void setG(double g) {
+      this.g = g;
+    }
+
+    public void setParent(Point parent) {
+      this.parent = parent;
     }
 
     public String toString() {
-      return "test";
+      return "Point: " + x + " " + y;
     }
   }
 
@@ -56,31 +77,19 @@ public class App {
     map[5] = new String[] { "O", "O", "W", "W", "O", "W", "O", "O" };
     map[6] = new String[] { "O", "O", "W", "W", "O", "W", "O", "O" };
     map[7] = new String[] { "O", "O", "W", "S", "O", "W", "O", "O" };
-    System.out.println(f(map, 4, 0));
 
-    Queue<Point> queue = new LinkedList<>();
-    queue.add(new Point(map, 3, 7));
+    Point start = findStart(map);
+    System.out.println(start);
 
-    while ((int) (f(map, queue.peek().getX(), queue.peek().getY())) != 0) {
-      Point cur = queue.remove();
-
+    List<Point> neighbors = getNeighbors(map, start);
+    for (Point p : neighbors) {
+      System.out.print(p + " ");
     }
-    System.out.println("reached end");
-  }
 
-  public static void diffuse(Queue<Point> q, Point p) {
-
-  }
-
-  public static double f(String[][] str, int x, int y) {
-    if (str[y][x].toLowerCase().equals("e")) {
-      return 0;
-    }
-    return h(str, x, y) + g(str, x, y);
   }
 
   // Assumed the goal is represented as 'E'
-  public static double h(String[][] str, int x, int y) {
+  public static double heuristic(String[][] str, int x, int y) {
     int x2 = 0;
     int y2 = 0;
     for (int r = 0; r < str.length; r++) {
@@ -95,20 +104,40 @@ public class App {
     return heuristic;
   }
 
-  // Assumed the start is represented as 'S'
-  public static double g(String[][] str, int x, int y) {
-    int x2 = 0;
-    int y2 = 0;
-    for (int r = 0; r < str.length; r++) {
-      for (int c = 0; c < str[0].length; c++) {
-        if (str[r][c].toLowerCase().equals("s")) {
-          x2 = c;
-          y2 = r;
+  public static List<Point> getNeighbors(String[][] map, Point p) {
+    List<Point> ret = new ArrayList<>();
+    int[][] directions = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+    for (int[] dir : directions) {
+      int x2 = p.getX() + dir[0];
+      int y2 = p.getY() + dir[1];
+
+      if ((y2 >= 0 && map.length > y2) && (x2 >= 0 && map[0].length > x2) && !map[y2][x2].toLowerCase().equals("w")) {
+        ret.add(new Point(x2, y2));
+      }
+
+    }
+    return ret;
+  }
+
+  public static Point findStart(String[][] map) {
+    for (int r = 0; r < map.length; r++) {
+      for (int c = 0; c < map[0].length; c++) {
+        if (map[r][c].toLowerCase().equals("s")) {
+          return new Point(c, r);
         }
       }
     }
-    double cost = Math.sqrt(Math.pow(x2 - x, 2) + Math.pow(y2 - y, 2));
-    return cost;
+    return null;
   }
 
+  public static Point findEnd(String[][] map) {
+    for (int r = 0; r < map.length; r++) {
+      for (int c = 0; c < map[0].length; c++) {
+        if (map[r][c].toLowerCase().equals("e")) {
+          return new Point(c, r);
+        }
+      }
+    }
+    return null;
+  }
 }
