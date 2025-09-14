@@ -1,8 +1,13 @@
 package com.Tawhidul.optimum_path_headless;
 
+import com.Tawhidul.optimum_path_headless.AStar;
+import com.Tawhidul.optimum_path_headless.AStar.Graph;
+import com.Tawhidul.optimum_path_headless.AStar.PathAndDistance;
+
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 import java.util.LinkedList;
 import org.jline.terminal.*;
 import org.jline.reader.*;
@@ -69,27 +74,51 @@ public class App {
 
   public static void main(String[] args) throws IOException {
     String[][] map = new String[8][8];
-    map[0] = new String[] { "O", "O", "W", "O", "E", "W", "O", "O" };
-    map[1] = new String[] { "O", "O", "W", "W", "O", "W", "O", "O" };
-    map[2] = new String[] { "O", "O", "W", "O", "O", "W", "O", "O" };
-    map[3] = new String[] { "O", "O", "W", "O", "W", "W", "O", "O" };
-    map[4] = new String[] { "O", "O", "W", "O", "O", "W", "O", "O" };
-    map[5] = new String[] { "O", "O", "W", "W", "O", "W", "O", "O" };
-    map[6] = new String[] { "O", "O", "W", "W", "O", "W", "O", "O" };
-    map[7] = new String[] { "O", "O", "W", "S", "O", "W", "O", "O" };
+    map[0] = new String[] { "W", "W", "W", "O", "E", "W", "W", "W" };
+    map[1] = new String[] { "W", "W", "W", "W", "O", "W", "W", "W" };
+    map[2] = new String[] { "W", "W", "W", "O", "O", "W", "W", "W" };
+    map[3] = new String[] { "W", "W", "W", "O", "W", "W", "W", "W" };
+    map[4] = new String[] { "W", "W", "W", "O", "O", "W", "W", "W" };
+    map[5] = new String[] { "W", "W", "W", "W", "O", "W", "W", "W" };
+    map[6] = new String[] { "W", "W", "W", "W", "O", "W", "W", "W" };
+    map[7] = new String[] { "W", "W", "W", "S", "O", "W", "W", "W" };
+
+    List<Integer> data = new ArrayList<Integer>();
+    int[] heuristics = new int[map.length * map[0].length];
+    Graph graph = new Graph(heuristics.length);
 
     Point start = findStart(map);
-    System.out.println(start);
+    Point end = findEnd(map);
 
-    List<Point> neighbors = getNeighbors(map, start);
-    for (Point p : neighbors) {
-      System.out.print(p + " ");
+    for (int y = 0; y < map.length; y++) {
+      for (int x = 0; x < map[0].length; x++) {
+        if (!map[y][x].toUpperCase().equals("W")) {
+          for (Point p : getNeighbors(map, new Point(x, y))) {
+            if (!map[p.getY()][p.getX()].toUpperCase().equals("W")) {
+              data.add(y * map[0].length + x);
+              data.add(p.getY() * map[0].length + p.getX());
+              data.add(1);
+              data.add(0);
+            }
+          }
+        }
+      }
     }
-
+    for (int r = 0; r < map.length; r++) {
+      for (int c = 0; c < map[0].length; c++) {
+        heuristics[r * map[0].length + c] = (int) Heuristic(map, c, r);
+      }
+    }
+    AStar.initializeGraph(graph, data);
+    PathAndDistance aStar = AStar.aStar(getId(map, start), getId(map, end), graph, heuristics);
+    ArrayList<Integer> path = aStar.getPath();
+    for (int i : path) {
+      System.out.println(i + " ");
+    }
   }
 
   // Assumed the goal is represented as 'E'
-  public static double heuristic(String[][] str, int x, int y) {
+  public static double Heuristic(String[][] str, int x, int y) {
     int x2 = 0;
     int y2 = 0;
     for (int r = 0; r < str.length; r++) {
@@ -102,6 +131,12 @@ public class App {
     }
     double heuristic = Math.sqrt(Math.pow(x2 - x, 2) + Math.pow(y2 - y, 2));
     return heuristic;
+  }
+
+  public static int getId(String[][] map, Point p) {
+    int id;
+    id = p.getY() * map[0].length + p.getX();
+    return id;
   }
 
   public static List<Point> getNeighbors(String[][] map, Point p) {
