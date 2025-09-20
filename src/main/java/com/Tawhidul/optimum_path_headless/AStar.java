@@ -97,7 +97,7 @@ public final class AStar {
 
   // Initializes the graph with edges defined in the input data
   static void initializeGraph(Graph graph, List<Integer> data) {
-    for (int i = 0; i < data.size(); i += 4) {
+    for (int i = 0; i < data.size(); i += 3) {
       graph.addEdge(new Edge(data.get(i), data.get(i + 1), data.get(i + 2)));
     }
   }
