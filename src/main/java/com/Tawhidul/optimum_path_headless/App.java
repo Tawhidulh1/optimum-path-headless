@@ -56,7 +56,6 @@ public class App {
     ArrayList<Integer> path = aStar.getPath();
     Render render = new Render();
     render.drawLayout();
-    System.in.read();
     render.close();
   }
 
