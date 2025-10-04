@@ -2,6 +2,7 @@ package com.Tawhidul.optimum_path_headless;
 
 import java.io.IOException;
 
+import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.Borders;
 import com.googlecode.lanterna.gui2.Direction;
@@ -27,6 +28,7 @@ public class Render extends BasicWindow {
     screen.startScreen();
 
     gui = new MultiWindowTextGUI(screen);
+    gui.setTheme(new RedTheme());
 
     mainPanel = new Panel();
     settings = new Settings("Settings");
@@ -65,6 +67,7 @@ public class Render extends BasicWindow {
   public void drawLayout() throws IOException {
 
     mainPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+    mainPanel.setTheme(new RedTheme());
 
     mainPanel.addComponent(settings.getPanel().withBorder(Borders.singleLine()),
         LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
@@ -72,7 +75,9 @@ public class Render extends BasicWindow {
         LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
 
     this.setComponent(mainPanel);
+
     gui.addWindowAndWait(this);
+
   }
 
   public void update() throws IOException {

@@ -101,7 +101,7 @@ public class Settings implements InputHandler {
 
     private void toggled() {
       selected = !selected;
-      button.setLabel((selected ? "[X] " : "[] ") + button.getLabel().substring(3));
+      button.setLabel((selected ? "[X]" : "[] ") + button.getLabel().substring(3));
     }
 
     public Button getButton() {
